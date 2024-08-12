@@ -1,0 +1,7 @@
+version = 0.1
+
+[default.deploy]
+region = "your-region"
+stack_name = "guests-management-lambdas"
+s3_bucket = "your-unique-bucket-name"
+capabilities = "CAPABILITY_IAM"

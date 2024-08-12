@@ -1,0 +1,132 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Transform: AWS::Serverless-2016-10-31
+Description: Ruby Lambda for handling guest data
+
+Globals:
+  Function:
+    Timeout: 10
+    MemorySize: 128
+    LoggingConfig:
+      LogFormat: JSON
+
+Resources:
+  GetAllGuestsFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: guest_management/
+      Handler: app.get_all_guests_handler
+      Runtime: ruby3.3
+      Architectures:
+        - x86_64
+      Events:
+        ApiEvent:
+          Type: Api
+          Properties:
+            Path: /guests
+            Method: get
+      Policies:
+        - DynamoDBReadPolicy:
+            TableName: Guests
+
+  SaveGuestFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: guest_management/
+      Handler: app.save_guest_handler
+      Runtime: ruby3.3
+      Architectures:
+        - x86_64
+      Events:
+        ApiEvent:
+          Type: Api
+          Properties:
+            Path: /guests
+            Method: post
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: Guests
+
+  GetGuestFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: guest_management/
+      Handler: app.get_guest_handler
+      Runtime: ruby3.3
+      Architectures:
+        - x86_64
+      Events:
+        ApiEvent:
+          Type: Api
+          Properties:
+            Path: /guests/{id}
+            Method: get
+      Policies:
+        - DynamoDBReadPolicy:
+            TableName: Guests
+
+  UpdateGuestFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: guest_management/
+      Handler: app.update_guest_handler
+      Runtime: ruby3.3
+      Architectures:
+        - x86_64
+      Events:
+        ApiEvent:
+          Type: Api
+          Properties:
+            Path: /guests/{id}
+            Method: put
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: Guests
+
+  DeleteGuestFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: guest_management/
+      Handler: app.delete_guest_handler
+      Runtime: ruby3.3
+      Architectures:
+        - x86_64
+      Events:
+        ApiEvent:
+          Type: Api
+          Properties:
+            Path: /guests/{id}
+            Method: delete
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: Guests
+
+  GuestsTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: Guests
+      AttributeDefinitions:
+        - AttributeName: id
+          AttributeType: S
+      KeySchema:
+        - AttributeName: id
+          KeyType: HASH
+      ProvisionedThroughput:
+        ReadCapacityUnits: 5
+        WriteCapacityUnits: 5
+
+Outputs:
+  GetAllGuestsApi:
+    Description: API Gateway endpoint URL for Prod stage for Get All Guests function
+    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/guests/"
+  CreateGuestApi:
+    Description: API Gateway endpoint URL for Prod stage for Guest function
+    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/guests/"
+  GetGuestApi:
+    Description: API Gateway endpoint URL for getting a guest by ID
+    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/guests/{id}"
+  UpdateGuestApi:
+    Description: API Gateway endpoint URL for updating a guest
+    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/guests/{id}"
+  DeleteGuestApi:
+    Description: API Gateway endpoint URL for deleting a guest
+    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/guests/{id}"
