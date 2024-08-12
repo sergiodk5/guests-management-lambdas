@@ -354,4 +354,6 @@ guest_management/.env
 # Ignore local vendor directory and bundle directory
 guest_management/vendor/
 guest_management/.bundle/
+guest_management/.bundle-cache/
+.bundle-cache/
 samconfig.toml

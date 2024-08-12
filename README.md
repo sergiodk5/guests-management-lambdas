@@ -69,7 +69,7 @@ version = 0.1
 [default.deploy]
 region = "eu-central-1"
 stack_name = "guests-management-lambdas"
-s3_bucket = "your-unique-bucket-name"
+s3_bucket = "guests-management-deployment-artifacts"
 capabilities = "CAPABILITY_IAM"
 ```
 
@@ -93,11 +93,11 @@ docker run -d -p 8000:8000 --name dynamodb-local -v $(pwd)/dynamodb-data:/home/d
 3. Create a table
 ```bash
    aws dynamodb create-table --table-name Guests \
-  --attribute-definitions AttributeName=id,AttributeType=S \
-  --key-schema AttributeName=id,KeyType=HASH \
-  --provisioned-throughput ReadCapacityUnits=5,WriteCapacityUnits=5 \
-  --endpoint-url http://localhost:8000 \
-  --region us-west-2
+    --attribute-definitions AttributeName=id,AttributeType=S \
+    --key-schema AttributeName=id,KeyType=HASH \
+    --provisioned-throughput ReadCapacityUnits=5,WriteCapacityUnits=5 \
+    --endpoint-url http://localhost:8000 \
+    --region us-west-2
 ```
 
 **Build lambdas with SAM**
@@ -116,8 +116,8 @@ You can use tools like Postman or `curl` to test the API endpoints:
 - Create a Guest:
 ```bash
 curl -X POST http://localhost:3000/guests \
--H "Content-Type: application/json" \
--d '{"guest":{"fullName":"John Doe","attending":true,"participants":[{"fullName":"Jane Doe","minor":false}]}}'
+  -H "Content-Type: application/json" \
+  -d '{"guest":{"fullName":"John Doe","attending":true,"participants":[{"fullName":"Jane Doe","minor":false}]}}'
 ```
 - Get All Guests:
 ```bash
@@ -127,8 +127,8 @@ curl -X GET http://localhost:3000/guests
 - Update a Guest:
 ```bash
 curl -X PUT http://localhost:3000/guests/{id} \
--H "Content-Type: application/json" \
--d '{"guest":{"fullName":"Jane Doe","attending":false,"participants":[{"fullName":"Jack Doe","minor":true}]}}'
+  -H "Content-Type: application/json" \
+  -d '{"guest":{"fullName":"Jane Doe","attending":false,"participants":[{"fullName":"Jack Doe","minor":true}]}}'
 ```
 
 - Delete a Guest:
@@ -147,6 +147,32 @@ sam deploy
 Or specify a different configuration file:
 ```bash
 sam deploy --config-file samconfig-dev.toml
+```
+
+### Deploying Infrastructure
+
+This project uses AWS CloudFormation to manage infrastructure as code. To set up the necessary resources for this application, follow these steps:
+
+**Deploy S3 Bucket**
+1. Navigate to the infrastructure directory:
+```bash
+cd infrastructure
+```
+2. Deploy the S3 bucket using AWS CloudFormation:
+```bash
+aws cloudformation deploy --template-file deployment-bucket-template.yaml --stack-name guests-management-deployment-stack --region eu-central-1
+```
+This command will create an S3 bucket for storing application artifacts.
+
+3. Monitor the deployment in the [AWS CloudFormation Console](https://console.aws.amazon.com/cloudformation).
+
+4. Verify that the bucket was created in the [S3 Console](href="https://s3.console.aws.amazon.com/s3/").
+
+### Clean Up
+To delete the infrastructure, run:
+
+```bash
+aws cloudformation delete-stack --stack-name guests-management-deployment-stack --region eu-central-1
 ```
 
 ## License
